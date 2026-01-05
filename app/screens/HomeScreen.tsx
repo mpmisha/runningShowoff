@@ -7,6 +7,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { SettingsModal } from '../components/SettingsModal';
+import { useSettings } from '../hooks/useSettings';
 
 type Props = {
   navigation: StackNavigationProp<any>;
@@ -14,6 +16,7 @@ type Props = {
 
 export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const { settings, saveSettings } = useSettings();
 
   const handleStartRun = () => {
     navigation.navigate('Showoff');
@@ -42,7 +45,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.startButtonText}>START RUN</Text>
       </TouchableOpacity>
 
-      {/* Settings Modal - TODO: implement in next step */}
+      {/* Settings Modal */}
+      <SettingsModal
+        visible={showSettings}
+        settings={settings}
+        onClose={() => setShowSettings(false)}
+        onSave={saveSettings}
+      />
     </View>
   );
 };

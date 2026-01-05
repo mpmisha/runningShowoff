@@ -8,8 +8,8 @@ import {
   Dimensions,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { DisplayStat, UserSettings } from '../types';
-import { DEFAULT_SETTINGS } from '../utils/constants';
+import { DisplayStat } from '../types';
+import { useSettings } from '../hooks/useSettings';
 
 type Props = {
   navigation: StackNavigationProp<any>;
@@ -19,7 +19,7 @@ const { width, height } = Dimensions.get('window');
 
 export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
   const [currentStat, setCurrentStat] = useState<DisplayStat>('distance');
-  const [settings] = useState<UserSettings>(DEFAULT_SETTINGS);
+  const { settings } = useSettings();
 
   // Mock data for now - will be replaced with real tracking data
   const mockData = {
