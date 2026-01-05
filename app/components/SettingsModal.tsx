@@ -34,6 +34,24 @@ export const SettingsModal: React.FC<Props> = ({
     onClose();
   };
 
+  const handleDistanceUnitChange = (newUnit: 'km' | 'miles') => {
+    if (newUnit === 'km') {
+      setLocalSettings({
+        ...localSettings,
+        distanceUnit: 'km',
+        paceUnit: 'min/km',
+        speedUnit: 'kmh',
+      });
+    } else {
+      setLocalSettings({
+        ...localSettings,
+        distanceUnit: 'miles',
+        paceUnit: 'min/mile',
+        speedUnit: 'mph',
+      });
+    }
+  };
+
   const isLight = localSettings.theme === 'light';
   const bgColor = isLight ? '#FFFFFF' : '#000000';
   const textColor = isLight ? '#000000' : '#FFFFFF';
@@ -71,16 +89,22 @@ export const SettingsModal: React.FC<Props> = ({
           showsVerticalScrollIndicator={true}
         >
           {/* Distance Units */}
-          <Text style={[styles.sectionTitle, { color: textColor }]}>Distance Units</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Distance Units</Text>
+            <Text style={[styles.infoIcon, { color: textColor }]}>ⓘ</Text>
+          </View>
+          <Text style={[styles.infoText, { color: textColor }]}>
+            Changing distance units will automatically adjust pace and speed units to match
+          </Text>
           <RadioOption
             label="Kilometers (KM)"
             selected={localSettings.distanceUnit === 'km'}
-            onPress={() => setLocalSettings({ ...localSettings, distanceUnit: 'km' })}
+            onPress={() => handleDistanceUnitChange('km')}
           />
           <RadioOption
             label="Miles"
             selected={localSettings.distanceUnit === 'miles'}
-            onPress={() => setLocalSettings({ ...localSettings, distanceUnit: 'miles' })}
+            onPress={() => handleDistanceUnitChange('miles')}
           />
 
           {/* Pace Format */}
@@ -176,11 +200,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 5,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginTop: 20,
+  },
+  infoIcon: {
+    fontSize: 16,
+    marginLeft: 6,
+    opacity: 0.6,
+  },
+  infoText: {
+    fontSize: 13,
+    opacity: 0.6,
     marginBottom: 10,
+    fontStyle: 'italic',
   },
   radioRow: {
     flexDirection: 'row',
