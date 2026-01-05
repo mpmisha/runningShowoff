@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { HomeScreen } from './app/screens/HomeScreen';
 import { ShowoffScreen } from './app/screens/ShowoffScreen';
+import { RunHistoryScreen } from './app/screens/RunHistoryScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createStackNavigator();
@@ -19,6 +20,7 @@ export default function App() {
         >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Showoff" component={ShowoffScreen} />
+          <Stack.Screen name="History" component={RunHistoryScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
