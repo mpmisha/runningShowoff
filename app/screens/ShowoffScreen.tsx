@@ -7,6 +7,7 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { DisplayStat } from '../types';
@@ -29,7 +30,10 @@ type Props = {
 const { width, height } = Dimensions.get('window');
 
 export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
-  const [currentStat, setCurrentStat] = useState<DisplayStat>('distance');
+  const stats: DisplayStat[] = ['distance', 'pace', 'speed', 'time', 'steps'];
+  const [currentStatIndex, setCurrentStatIndex] = useState(0);
+  const currentStat = stats[currentStatIndex];
+  
   const { settings } = useSettings();
   const tracking = useGPSTracking(settings.gpsAccuracy);
   const stepCounter = useStepCounter();
@@ -70,12 +74,28 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
     navigation.goBack();
   };
 
+  // Swipe gesture handlers
+  const swipeLeft = Gesture.Fling()
+    .direction(2) // Left
+    .onEnd(() => {
+      setCurrentStatIndex((prev) => (prev + 1) % stats.length);
+    });
+
+  const swipeRight = Gesture.Fling()
+    .direction(1) // Right
+    .onEnd(() => {
+      setCurrentStatIndex((prev) => (prev - 1 + stats.length) % stats.length);
+    });
+
+  const gesture = Gesture.Race(swipeLeft, swipeRight);
+
   const isLight = settings.theme === 'light';
   const bgColor = isLight ? '#FFFFFF' : '#000000';
   const textColor = isLight ? '#000000' : '#FFFFFF';
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
+    <GestureDetector gesture={gesture}>
+      <View style={[styles.container, { backgroundColor: bgColor }]}>
       <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
 
       {/* Close Button */}
@@ -100,8 +120,24 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
         </Text>
       )}
 
-      {/* TODO: Add swipe gesture handler in Phase 8 */}
-    </View>
+      {/* Swipe Indicator */}
+      <View style={styles.indicatorContainer}>
+        {stats.map((stat, index) => (
+          <View
+            key={stat}
+            style={[
+              styles.indicator,
+              {
+                backgroundColor: index === currentStatIndex ? textColor : 'transparent',
+                borderColor: textColor,
+                opacity: index === currentStatIndex ? 1 : 0.3,
+              },
+            ]}
+          />
+        ))}
+      </View>
+      </View>
+    </GestureDetector>
   );
 };
 
@@ -140,5 +176,17 @@ const styles = StyleSheet.create({
     bottom: 100,
     fontSize: 16,
     opacity: 0.6,
+  },
+  indicatorContainer: {
+    position: 'absolute',
+    bottom: 50,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1,
   },
 });
