@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,17 @@ import {
   Dimensions,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { DisplayStat } from '../types';
 import { useSettings } from '../hooks/useSettings';
+import { useGPSTracking } from '../hooks/useGPSTracking';
+import {
+  formatDistance,
+  formatPace,
+  formatSpeed,
+  formatTime,
+  getUnitLabel,
+} from '../utils/formatters';
 
 type Props = {
   navigation: StackNavigationProp<any>;
@@ -20,25 +29,38 @@ const { width, height } = Dimensions.get('window');
 export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
   const [currentStat, setCurrentStat] = useState<DisplayStat>('distance');
   const { settings } = useSettings();
+  const tracking = useGPSTracking(settings.gpsAccuracy);
 
-  // Mock data for now - will be replaced with real tracking data
-  const mockData = {
-    distance: '5.23',
-    pace: '4:30',
-    speed: '12.5',
-    time: '23:45',
-    steps: '3,847',
+  // Start tracking when component mounts
+  useEffect(() => {
+    tracking.startTracking();
+    activateKeepAwakeAsync(); // Keep screen awake during run
+
+    return () => {
+      tracking.stopTracking();
+      deactivateKeepAwake();
+    };
+  }, []);
+
+  // Format real tracking data
+  const displayData = {
+    distance: formatDistance(tracking.distance, settings.distanceUnit),
+    pace: formatPace(tracking.averageSpeed, settings.paceUnit),
+    speed: formatSpeed(tracking.currentSpeed, settings.speedUnit),
+    time: formatTime(tracking.elapsedTime),
+    steps: '0', // TODO: Will add in Phase 7
   };
 
-  const mockUnits = {
-    distance: 'KM',
-    pace: 'min/km',
-    speed: 'km/h',
+  const displayUnits = {
+    distance: getUnitLabel('distance', settings),
+    pace: getUnitLabel('pace', settings),
+    speed: getUnitLabel('speed', settings),
     time: '',
     steps: 'steps',
   };
 
   const handleClose = () => {
+    tracking.stopTracking();
     navigation.goBack();
   };
 
@@ -58,14 +80,21 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
       {/* Stat Display */}
       <View style={styles.statContainer}>
         <Text style={[styles.statValue, { color: textColor }]}>
-          {mockData[currentStat]}
+          {displayData[currentStat]}
         </Text>
         <Text style={[styles.statUnit, { color: textColor }]}>
-          {mockUnits[currentStat]}
+          {displayUnits[currentStat]}
         </Text>
       </View>
 
-      {/* TODO: Add swipe gesture handler in Phase 4 */}
+      {/* Permission Error */}
+      {tracking.permissionError && (
+        <Text style={[styles.errorText, { color: textColor }]}>
+          Location permission required
+        </Text>
+      )}
+
+      {/* TODO: Add swipe gesture handler in Phase 8 */}
     </View>
   );
 };
@@ -99,5 +128,11 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '400',
     marginTop: 10,
+  },
+  errorText: {
+    position: 'absolute',
+    bottom: 100,
+    fontSize: 16,
+    opacity: 0.6,
   },
 });
