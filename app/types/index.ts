@@ -28,3 +28,18 @@ export interface LocationCoords {
   accuracy: number;
   timestamp: number;
 }
+
+// Run History
+export interface RunSession {
+  id: string;
+  timestamp: number; // Unix timestamp when run started
+  duration: number; // in seconds
+  distance: number; // in meters
+  averageSpeed: number; // in m/s
+  steps: number;
+  settingsSnapshot: {
+    distanceUnit: 'km' | 'miles';
+    paceUnit: 'min/km' | 'min/mile';
+    speedUnit: 'kmh' | 'mph';
+  };
+}

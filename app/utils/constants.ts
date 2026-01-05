@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
 // AsyncStorage keys
 export const STORAGE_KEYS = {
   USER_SETTINGS: '@runningShowoff:userSettings',
+  RUN_HISTORY: '@runningShowoff:runHistory',
 };
 
 // GPS accuracy settings

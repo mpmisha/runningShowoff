@@ -30,6 +30,14 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       
+      {/* History Button */}
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={() => navigation.navigate('History')}
+      >
+        <Text style={styles.historyIcon}>📊</Text>
+      </TouchableOpacity>
+
       {/* Settings Button */}
       <TouchableOpacity
         style={styles.settingsButton}
@@ -65,6 +73,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  historyButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    padding: 10,
+  },
+  historyIcon: {
+    fontSize: 28,
   },
   settingsButton: {
     position: 'absolute',

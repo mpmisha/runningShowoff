@@ -11,10 +11,11 @@ import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { DisplayStat } from "../types";
+import { DisplayStat, RunSession } from "../types";
 import { useSettings } from "../hooks/useSettings";
 import { useGPSTracking } from "../hooks/useGPSTracking";
 import { useStepCounter } from "../hooks/useStepCounter";
+import { useRunHistory } from "../hooks/useRunHistory";
 import {
   formatDistance,
   formatPace,
@@ -38,12 +39,15 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
   const { settings } = useSettings();
   const tracking = useGPSTracking(settings.gpsAccuracy);
   const stepCounter = useStepCounter();
+  const runHistory = useRunHistory();
+  const [runStartTime, setRunStartTime] = useState<number>(0);
 
   // Start tracking once permissions are confirmed
   useEffect(() => {
     if (tracking.hasPermission && !tracking.isTracking) {
       tracking.startTracking();
       stepCounter.startCounting();
+      setRunStartTime(Date.now()); // Record when run started
     }
   }, [tracking.hasPermission, tracking.isTracking]);
 
@@ -84,7 +88,28 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
     steps: "steps",
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    // Save run to history if it's valid (at least 30 seconds or 50 meters)
+    const isValidRun = tracking.elapsedTime >= 30 || tracking.distance >= 50;
+    
+    if (isValidRun) {
+      const runSession: RunSession = {
+        id: runHistory.generateRunId(),
+        timestamp: runStartTime,
+        duration: tracking.elapsedTime,
+        distance: tracking.distance,
+        averageSpeed: tracking.averageSpeed,
+        steps: stepCounter.steps,
+        settingsSnapshot: {
+          distanceUnit: settings.distanceUnit,
+          paceUnit: settings.paceUnit,
+          speedUnit: settings.speedUnit,
+        },
+      };
+      
+      await runHistory.saveRun(runSession);
+    }
+    
     tracking.stopTracking();
     stepCounter.stopCounting();
     navigation.goBack();
