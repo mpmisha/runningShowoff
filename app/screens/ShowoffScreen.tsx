@@ -10,6 +10,7 @@ import {
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { DisplayStat } from '../types';
 import { useSettings } from '../hooks/useSettings';
 import { useGPSTracking } from '../hooks/useGPSTracking';
@@ -44,12 +45,21 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
     stepCounter.startCounting();
     activateKeepAwakeAsync(); // Keep screen awake during run
 
+    // Set screen orientation based on settings
+    if (settings.lockRotation) {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+    } else {
+      ScreenOrientation.unlockAsync();
+    }
+
     return () => {
       tracking.stopTracking();
       stepCounter.stopCounting();
       deactivateKeepAwake();
+      // Reset to portrait when leaving screen
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
     };
-  }, []);
+  }, [settings.lockRotation]);
 
   // Format real tracking data
   const displayData = {

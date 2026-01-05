@@ -22,9 +22,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
     navigation.navigate('Showoff');
   };
 
+  const isLight = settings.theme === 'light';
+  const bgColor = isLight ? '#FFFFFF' : '#000000';
+  const textColor = isLight ? '#000000' : '#FFFFFF';
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
       
       {/* Settings Button */}
       <TouchableOpacity
@@ -35,7 +39,7 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* App Title */}
-      <Text style={styles.title}>Running Showoff</Text>
+      <Text style={[styles.title, { color: textColor }]}>Running Showoff</Text>
 
       {/* Start Button */}
       <TouchableOpacity
@@ -59,7 +63,6 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -76,7 +79,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '600',
     marginBottom: 60,
-    color: '#000000',
   },
   startButton: {
     backgroundColor: '#007AFF',

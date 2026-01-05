@@ -29,6 +29,10 @@ export const SettingsModal: React.FC<Props> = ({
     onClose();
   };
 
+  const isLight = localSettings.theme === 'light';
+  const bgColor = isLight ? '#FFFFFF' : '#000000';
+  const textColor = isLight ? '#000000' : '#FFFFFF';
+
   const RadioOption = ({ 
     label, 
     selected, 
@@ -39,10 +43,10 @@ export const SettingsModal: React.FC<Props> = ({
     onPress: () => void;
   }) => (
     <TouchableOpacity style={styles.radioRow} onPress={onPress}>
-      <View style={styles.radio}>
-        {selected && <View style={styles.radioSelected} />}
+      <View style={[styles.radio, { borderColor: textColor }]}>
+        {selected && <View style={[styles.radioSelected, { backgroundColor: textColor }]} />}
       </View>
-      <Text style={styles.radioLabel}>{label}</Text>
+      <Text style={[styles.radioLabel, { color: textColor }]}>{label}</Text>
     </TouchableOpacity>
   );
 
@@ -53,12 +57,16 @@ export const SettingsModal: React.FC<Props> = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <Text style={styles.title}>Settings</Text>
+      <View style={[styles.container, { backgroundColor: bgColor }]}>
+        <Text style={[styles.title, { color: textColor }]}>Settings</Text>
 
-        <ScrollView style={styles.scrollView}>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+        >
           {/* Distance Units */}
-          <Text style={styles.sectionTitle}>Distance Units</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Distance Units</Text>
           <RadioOption
             label="Kilometers (KM)"
             selected={localSettings.distanceUnit === 'km'}
@@ -71,7 +79,7 @@ export const SettingsModal: React.FC<Props> = ({
           />
 
           {/* Pace Format */}
-          <Text style={styles.sectionTitle}>Pace Format</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Pace Format</Text>
           <RadioOption
             label="min/km"
             selected={localSettings.paceUnit === 'min/km'}
@@ -84,7 +92,7 @@ export const SettingsModal: React.FC<Props> = ({
           />
 
           {/* Speed Format */}
-          <Text style={styles.sectionTitle}>Speed Format</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Speed Format</Text>
           <RadioOption
             label="km/h"
             selected={localSettings.speedUnit === 'kmh'}
@@ -97,7 +105,7 @@ export const SettingsModal: React.FC<Props> = ({
           />
 
           {/* Display Theme */}
-          <Text style={styles.sectionTitle}>Display Theme</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Display Theme</Text>
           <RadioOption
             label="Light (black on white)"
             selected={localSettings.theme === 'light'}
@@ -110,7 +118,7 @@ export const SettingsModal: React.FC<Props> = ({
           />
 
           {/* Lock Rotation */}
-          <Text style={styles.sectionTitle}>Lock Rotation</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Lock Rotation</Text>
           <RadioOption
             label="Locked (portrait only)"
             selected={localSettings.lockRotation === true}
@@ -123,7 +131,7 @@ export const SettingsModal: React.FC<Props> = ({
           />
 
           {/* GPS Accuracy */}
-          <Text style={styles.sectionTitle}>GPS Accuracy</Text>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>GPS Accuracy</Text>
           <RadioOption
             label="High (drains battery)"
             selected={localSettings.gpsAccuracy === 'high'}
@@ -148,7 +156,6 @@ export const SettingsModal: React.FC<Props> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     paddingTop: 60,
   },
   title: {
@@ -159,7 +166,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
@@ -177,7 +187,6 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#007AFF',
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -186,7 +195,6 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#007AFF',
   },
   radioLabel: {
     fontSize: 16,
