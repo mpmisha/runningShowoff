@@ -12,11 +12,13 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { DisplayStat } from '../types';
 import { useSettings } from '../hooks/useSettings';
 import { useGPSTracking } from '../hooks/useGPSTracking';
+import { useStepCounter } from '../hooks/useStepCounter';
 import {
   formatDistance,
   formatPace,
   formatSpeed,
   formatTime,
+  formatSteps,
   getUnitLabel,
 } from '../utils/formatters';
 
@@ -30,14 +32,17 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
   const [currentStat, setCurrentStat] = useState<DisplayStat>('distance');
   const { settings } = useSettings();
   const tracking = useGPSTracking(settings.gpsAccuracy);
+  const stepCounter = useStepCounter();
 
   // Start tracking when component mounts
   useEffect(() => {
     tracking.startTracking();
+    stepCounter.startCounting();
     activateKeepAwakeAsync(); // Keep screen awake during run
 
     return () => {
       tracking.stopTracking();
+      stepCounter.stopCounting();
       deactivateKeepAwake();
     };
   }, []);
@@ -48,7 +53,7 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
     pace: formatPace(tracking.averageSpeed, settings.paceUnit),
     speed: formatSpeed(tracking.currentSpeed, settings.speedUnit),
     time: formatTime(tracking.elapsedTime),
-    steps: '0', // TODO: Will add in Phase 7
+    steps: formatSteps(stepCounter.steps),
   };
 
   const displayUnits = {
@@ -61,6 +66,7 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleClose = () => {
     tracking.stopTracking();
+    stepCounter.stopCounting();
     navigation.goBack();
   };
 
