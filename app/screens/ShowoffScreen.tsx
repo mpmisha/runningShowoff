@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,15 @@ import {
   StyleSheet,
   StatusBar,
   Dimensions,
-} from 'react-native';
-import { GestureDetector, Gesture } from 'react-native-gesture-handler';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import { DisplayStat } from '../types';
-import { useSettings } from '../hooks/useSettings';
-import { useGPSTracking } from '../hooks/useGPSTracking';
-import { useStepCounter } from '../hooks/useStepCounter';
+} from "react-native";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { DisplayStat } from "../types";
+import { useSettings } from "../hooks/useSettings";
+import { useGPSTracking } from "../hooks/useGPSTracking";
+import { useStepCounter } from "../hooks/useStepCounter";
 import {
   formatDistance,
   formatPace,
@@ -22,27 +22,33 @@ import {
   formatTime,
   formatSteps,
   getUnitLabel,
-} from '../utils/formatters';
+} from "../utils/formatters";
 
 type Props = {
   navigation: StackNavigationProp<any>;
 };
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
-  const stats: DisplayStat[] = ['distance', 'pace', 'speed', 'time', 'steps'];
+  const stats: DisplayStat[] = ["distance", "pace", "speed", "time", "steps"];
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const currentStat = stats[currentStatIndex];
-  
+
   const { settings } = useSettings();
   const tracking = useGPSTracking(settings.gpsAccuracy);
   const stepCounter = useStepCounter();
 
-  // Start tracking when component mounts
+  // Start tracking once permissions are confirmed
   useEffect(() => {
-    tracking.startTracking();
-    stepCounter.startCounting();
+    if (tracking.hasPermission && !tracking.isTracking) {
+      tracking.startTracking();
+      stepCounter.startCounting();
+    }
+  }, [tracking.hasPermission, tracking.isTracking]);
+
+  // Handle keep awake and screen orientation
+  useEffect(() => {
     activateKeepAwakeAsync(); // Keep screen awake during run
 
     // Set screen orientation based on settings
@@ -71,11 +77,11 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const displayUnits = {
-    distance: getUnitLabel('distance', settings),
-    pace: getUnitLabel('pace', settings),
-    speed: getUnitLabel('speed', settings),
-    time: '',
-    steps: 'steps',
+    distance: getUnitLabel("distance", settings),
+    pace: getUnitLabel("pace", settings),
+    speed: getUnitLabel("speed", settings),
+    time: "",
+    steps: "steps",
   };
 
   const handleClose = () => {
@@ -99,53 +105,54 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
 
   const gesture = Gesture.Race(swipeLeft, swipeRight);
 
-  const isLight = settings.theme === 'light';
-  const bgColor = isLight ? '#FFFFFF' : '#000000';
-  const textColor = isLight ? '#000000' : '#FFFFFF';
+  const isLight = settings.theme === "light";
+  const bgColor = isLight ? "#FFFFFF" : "#000000";
+  const textColor = isLight ? "#000000" : "#FFFFFF";
 
   return (
     <GestureDetector gesture={gesture}>
       <View style={[styles.container, { backgroundColor: bgColor }]}>
-      <StatusBar barStyle={isLight ? 'dark-content' : 'light-content'} />
+        <StatusBar barStyle={isLight ? "dark-content" : "light-content"} />
 
-      {/* Close Button */}
-      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-        <Text style={[styles.closeText, { color: textColor }]}>×</Text>
-      </TouchableOpacity>
+        {/* Close Button */}
+        <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+          <Text style={[styles.closeText, { color: textColor }]}>×</Text>
+        </TouchableOpacity>
 
-      {/* Stat Display */}
-      <View style={styles.statContainer}>
-        <Text style={[styles.statValue, { color: textColor }]}>
-          {displayData[currentStat]}
-        </Text>
-        <Text style={[styles.statUnit, { color: textColor }]}>
-          {displayUnits[currentStat]}
-        </Text>
-      </View>
+        {/* Stat Display */}
+        <View style={styles.statContainer}>
+          <Text style={[styles.statValue, { color: textColor }]}>
+            {displayData[currentStat]}
+          </Text>
+          <Text style={[styles.statUnit, { color: textColor }]}>
+            {displayUnits[currentStat]}
+          </Text>
+        </View>
 
-      {/* Permission Error */}
-      {tracking.permissionError && (
-        <Text style={[styles.errorText, { color: textColor }]}>
-          Location permission required
-        </Text>
-      )}
+        {/* Permission Error */}
+        {tracking.permissionError && (
+          <Text style={[styles.errorText, { color: textColor }]}>
+            Location permission required
+          </Text>
+        )}
 
-      {/* Swipe Indicator */}
-      <View style={styles.indicatorContainer}>
-        {stats.map((stat, index) => (
-          <View
-            key={stat}
-            style={[
-              styles.indicator,
-              {
-                backgroundColor: index === currentStatIndex ? textColor : 'transparent',
-                borderColor: textColor,
-                opacity: index === currentStatIndex ? 1 : 0.3,
-              },
-            ]}
-          />
-        ))}
-      </View>
+        {/* Swipe Indicator */}
+        <View style={styles.indicatorContainer}>
+          {stats.map((stat, index) => (
+            <View
+              key={stat}
+              style={[
+                styles.indicator,
+                {
+                  backgroundColor:
+                    index === currentStatIndex ? textColor : "transparent",
+                  borderColor: textColor,
+                  opacity: index === currentStatIndex ? 1 : 0.3,
+                },
+              ]}
+            />
+          ))}
+        </View>
       </View>
     </GestureDetector>
   );
@@ -154,11 +161,11 @@ export const ShowoffScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     left: 20,
     padding: 10,
@@ -166,31 +173,31 @@ const styles = StyleSheet.create({
   },
   closeText: {
     fontSize: 40,
-    fontWeight: '300',
+    fontWeight: "300",
   },
   statContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   statValue: {
     fontSize: Math.min(width, height) * 0.35, // Massive font for maximum visibility
-    fontWeight: '400',
-    fontFamily: 'System',
+    fontWeight: "400",
+    fontFamily: "System",
   },
   statUnit: {
     fontSize: 40,
-    fontWeight: '400',
+    fontWeight: "400",
     marginTop: 10,
   },
   errorText: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 100,
     fontSize: 16,
     opacity: 0.6,
   },
   indicatorContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 50,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   indicator: {

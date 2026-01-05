@@ -44,13 +44,19 @@ export const formatSpeed = (
 // Format elapsed time
 export const formatTime = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
-  
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+  if (hours >= 10) {
+    // Over 10 hours: Show HH:MM (drop seconds)
+    return `${hours}:${mins.toString().padStart(2, '0')}`;
+  } else if (hours >= 1) {
+    // 1-10 hours: Show H:MM:SS
+    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  } else {
+    // Under 1 hour: Show MM:SS
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
-  return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
 
 // Format steps with commas
