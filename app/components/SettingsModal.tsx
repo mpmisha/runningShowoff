@@ -24,6 +24,11 @@ export const SettingsModal: React.FC<Props> = ({
 }) => {
   const [localSettings, setLocalSettings] = React.useState(settings);
 
+  // Sync local settings when settings prop changes (e.g., after app restart)
+  React.useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
   const handleSave = () => {
     onSave(localSettings);
     onClose();
